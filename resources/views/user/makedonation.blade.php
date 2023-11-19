@@ -90,7 +90,7 @@
             <label class="text-black mb-2" for="courier">Courier</label>
             <input type="text" name="courier" class="rounded shadow border-0 w-full">
             <label class="text-black mb-2" for="dropoff_location">Drop Off Location</label>
-            <input type="text" name="dropoff_location" class="rounded shadow border-0 w-full" id="dropoff_location">
+            <input type="text" name="dropoff_location" class="rounded shadow border-0 w-full" id="dropoff_location" value="Manila" readonly>
         </div>
         <div class="mb-4 mt-4">
             <button type="submit" class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-full w-full" style="background: blue">

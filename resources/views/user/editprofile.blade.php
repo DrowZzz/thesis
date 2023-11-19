@@ -76,7 +76,7 @@
                                                     </div>
                                                     <div class="col">
                                                         <label for="birthday" class="form-label">Birthday</label>
-                                                        <input type="date" class="form-control border border-secondary-subtle" id="birthday" name = "birthday" placeholder="Birthday" aria-label="Birthday" value="{{$user->birthday}}" >
+                                                        <input type="date" class="form-control border border-secondary-subtle" id="birthday" name = "birthday" placeholder="Birthday" aria-label="Birthday" value="{{$user->birthday}}" readonly>
                                                     </div>
                                                 </div>
                                                 <!-- Form Inputs End -->

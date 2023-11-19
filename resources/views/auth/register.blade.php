@@ -36,6 +36,11 @@
             </div>
 
             <div class="mt-4">
+                <x-label for="birthday" value="{{ __('Birthday') }}" />
+                <x-input id="birthday" class="block mt-1 w-full" type="date" name="birthday" :value="old('birthday')" required autocomplete="username" />
+            </div>
+
+            <div class="mt-4">
                 <x-label for="contact" value="{{ __('Contact') }}" />   
                 <div class="flex">
                 <select class="block mt-1 mr-1 rounded-md border-gray-300" id="region" name='region' :value="old('region')">

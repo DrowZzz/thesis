@@ -55,7 +55,7 @@
                         <div class="border-b"></div> <!-- Add another horizontal line here -->
                         <div class="flex items-center justify-between">
                           <div class="text-sm font-medium">Donation ID: #{{ $donation->uuid }}</div>
-                          <div><a href="#" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out">Update</a></div>
+                          <div><a href="{{url('donationupdate', $donation->id)}}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out">Update</a></div>
                         </div>
                       </div>
                     </div>
@@ -86,9 +86,12 @@
                         <div class="border-b"></div> <!-- Add a horizontal line here -->
                         <div class="text-sm text-gray-700">Status: {{ $donation->status }}</div>
                         <div class="border-b"></div> <!-- Add another horizontal line here -->
-                        <div class="flex items-center justify-between">
+                        <div class="col-12 flex flex-row items-center justify-between">
                           <div class="text-sm font-medium">Donation ID: #{{ $donation->uuid }}</div>
-                        </div>
+                          @if($donation->status === 'Approved')
+                              <button id="openButton" class="text-sm font-bold text-white p-2 rounded-full" style="background: #5e2c04" onclick="toggleDetails()">View Details</button>
+                          @endif
+                      </div>
                       </div>
                     </div>
                 @endforeach
@@ -127,15 +130,69 @@
                 {{ $disapprovedDonations->links('pagination::bootstrap-4', ['page' => 'disapproved_page']) }}
                 </div>        
             </div>
-
-              </div>
             </div>
 
+            <div id="donationModal" class="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50 hidden">
+              <!-- Donation details styled like a receipt -->
+              <div class="border border-gray-300 p-8 bg-white max-w-md relative">
+                  <button class="absolute top-4 right-4 text-red-600 border-none p-2 cursor-pointer c" onclick="toggleDetails()">x</button>
+                  <img src="/images/logo.png" alt="" class="w-1/2 h-auto mb-4 mt-4">
+                  <h1 class="text-3xl font-bold mb-4">Your Donation is Approved</h1>
 
+                  <h2 class="text-xl font-bold mb-4">Hello Donor,</h2>
+                  <p class="text-lg font-bold mb-4">Here's your donation Details</p>
+
+
+                  <div class="border-b"></div> <!-- Add another horizontal line here -->
+          
+                  <div class="mb-4">
+                      <div class="font-bold text-gray-800">Donor: {{ $donation->name }}</div>
+                      <div class="font-bold text-gray-500">Date: {{ $donation->created_at }}</div>
+                  </div>
+
+                  <div class="flex flex-row justify-between mb-4 space-x-2">
+                    <div class=" text-gray-500">ID: {{ $donation->uuid }}</div>
+                    @if ($donation->mode_of_delivery = 'Pick Up')
+                    <div class="text-gray-500">Mode of Donation: {{ $donation->mode_of_delivery }}</div>
+                    <div class=" text-gray-500">Pick-Up Date: {{ $donation->date }}</div>
+                    <div class="text-gray-500">Location: {{ $donation->pickup_location }}</div>
+
+                    @elseif ($donation->mode_of_delivery = 'Delivery')
+                    <div class="text-gray-500">Mode of Donation: {{ $donation->mode_of_delivery}}</div>
+                    <div class=" text-gray-500">Pick-Up Date: {{ $donation->dropoff_date }}</div>
+                    <div class="text-gray-500">Location: Manila</div>
+                      
+                    @endif
+  
+                    
+                </div>
+
+                <div class="border-b"></div> <!-- Add another horizontal line here -->
+                    <div class="flex flex-col m-2">
+                        <div class="font-bold text-gray-600">Spent Coffee Grounds</div>
+                        <div class="text-gray-700">Quantity: {{ $donation->quantity }} kg</div>
+                    </div>
+                <div class="border-b"></div> <!-- Add another horizontal line here -->
+
+                  <div class="text-center mt-4">
+                      <p class="text-lg font-bold text-indigo-800 mb-4">Thank you for your donation!</p>
+                  </div>
+
+                  <a href="{{ url('print_pdf', $donation->id) }}" class="text-sm font-bold text-white p-2 rounded-full flex justify-center " style="background: #5e2c04">Print</a>
+              </div>
+          </div>
         </div>
       </div>
     </div>
     
+
     @include('admin.js')
+
+    <script>
+      function toggleDetails() {
+          var modal = document.getElementById("donationModal");
+          modal.style.display = modal.style.display === "none" ? "flex" : "none";
+      }
+  </script>
   </body>
 </html>

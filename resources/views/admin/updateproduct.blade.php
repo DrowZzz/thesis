@@ -37,7 +37,6 @@
             @endif
                 <form action="{{ url('/confirm_update', $product->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
-                    @csrf
                     <ul class="nav nav-tabs nav-fill" id="myTab" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="home" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="Home-pane" aria-selected="true">Home</button>

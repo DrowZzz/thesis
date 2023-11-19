@@ -48,6 +48,7 @@
                     <tbody>
                         @foreach ($order as $order)
                         <tr>
+                            <td class="px-4 py-2 text-black">{{ $order->uuid }}</td>
                             <td class="px-4 py-2 text-black">{{ $order->name }}</td>
                             <td class="px-4 py-2 text-black">{{ $order->email }}</td>
                             <td class="px-4 py-2 text-black">{{ $order->contact }}</td>
@@ -59,7 +60,7 @@
                             <td class="px-4 py-2 text-black">{{ $order->payment_status }}</td>
                             <td class="px-4 py-2 text-black">{{ $order->delivery_status }}</td>
                             <td class="px-4 py-2 text-black">   
-                              <a href="{{ url('deliver',$order->id) }}" class="ml-2 text-blue-500 hover:underline">Update</a>                        
+                              <a href="{{ url('/updatestatus_order',$order->id) }}" class="ml-2 text-blue-500 hover:underline">Update</a>                        
                             </td>
                         </tr>
                         @endforeach

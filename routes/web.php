@@ -54,8 +54,7 @@ Route::get('/remove_cart/{id}', [HomeController::class,'remove_cart']);
 
 Route::get('/cash_order', [HomeController::class,'cash_order']);
 
-
-
+Route::get('/print_pdf/{id}', [HomeController::class,'print_pdf']);
 
 
 //admin users//
@@ -66,7 +65,8 @@ Route::post('/users_add', [AdminController::class, 'users_add']);
 Route::get('/users_manage', [AdminController::class,'users_manage']) ;
 
 Route::get('/donation', [AdminController::class,'donationlist']) ;
-Route::get('/updatedonation/{id}', [AdminController::class,'updatedonation']) ;
+Route::get('/donationupdate/{id}', [AdminController::class,'donationupdate']) ;
+Route::post('/confirm_donationupdate/{id}', [AdminController::class,'confirm_donationupdate']) ;
 
 //admin products//
 Route::get('/products_manage', [AdminController::class,'products_manage']) ;
@@ -77,4 +77,7 @@ Route::post('/confirm_update/{id}', [AdminController::class,'confirm_update']);
 Route::post('/add_product', [AdminController::class,'add_product']) ;
 
 Route::get('/orderlist', [AdminController::class,'orderlist']) ;
-Route::get('/deliver/{id}', [AdminController::class,'deliver']) ;
+Route::get('/updatestatus_order/{id}', [AdminController::class,'updatestatus_order']) ;
+Route::post('/confirmupdatestatus_order/{id}', [AdminController::class,'confirmupdatestatus_order']) ;
+
+

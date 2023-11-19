@@ -17,8 +17,7 @@ trait PasswordValidationRules
             'required',
             'string',
             'confirmed',
-            'min:8', // Minimum length of 8 characters
-            'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/', // Requires at least one uppercase, one lowercase, one number, and one special character
+            'min:8',
         ];
     }
 }

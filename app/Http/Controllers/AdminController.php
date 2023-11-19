@@ -74,22 +74,29 @@ class AdminController extends Controller
 }
 public function donationlist()
 {
-    $pendingDonations = Donations::where('status', 'pending')->paginate(3, ['*'], 'pending_page');
-    $approvedDonations = Donations::where('status', 'approved')->paginate(3, ['*'], 'approved_page');
-    $disapprovedDonations = Donations::where('status', 'cancelled')->paginate(3, ['*'], 'disapproved_page');
+    $pendingDonations = Donations::where('status', 'Pending')->paginate(3, ['*'], 'pending_page');
+    $approvedDonations = Donations::where('status', 'Approved')->paginate(3, ['*'], 'approved_page');
+    $disapprovedDonations = Donations::where('status', 'Disapproved')->paginate(3, ['*'], 'disapproved_page');
 
     return view('admin.donationlist', compact('pendingDonations', 'approvedDonations', 'disapprovedDonations'));
 }
 
+public function donationupdate($id)
+{
+    $donation=Donations::find($id);
+    return view('admin.donationupdate',compact('donation'));
+}
 
-    public function updatedonation($id)
-    {
-        $donation=Donations::find($id);
-        $donation->status = "Approved";
-        $donation->save();
-        return redirect()->back()->with('message','Thank you for your Donation.');
-    }
+public function confirm_donationupdate(Request $request, $id)
+{ 
+    $donation = Donations::find($id);
 
+    $donation->status = $request->status;
+
+    $donation->save();
+
+    return redirect('/donation')->with('message', 'Status Updated')->with('success', true);
+}
 
     public function products_manage()
 {
@@ -238,17 +245,53 @@ public function donationlist()
         return view('admin.orders',compact('order'));
     }
 
-    public function deliver($id)
-    {
-        $order=Order::find($id);
-        $order->delivery_status = "Delivered";
-        $order->payment_status = "Paid";
-        $order->save();
-        return redirect()->back()->with('message','We Have Recieved your Order. We will connect with you soon');
+    public function updatestatus_order($id)
+    {  
+        $order=order::find($id);
+       return view('admin.updatestatus_order', compact('order'));
     }
 
-
+    public function confirmupdatestatus_order(Request $request, $id)
+    {
+        $order = Order::find($id); // Find the existing product by ID
     
+        if (!$order) {
+            return redirect()->back()->with('message', 'order not found')->with('success', false);
+        }
+    
+        $rules = [
+            'product_title' => 'required',
+            'quantity' => 'required|numeric',
+            'price' => 'required|numeric',
+            'delivery_status' => 'required',
+            'payment_status' => 'required',
+        ];
+    
+        // Create a custom error message for image validation
+        $customMessages = [
 
+        ];
+    
+        // Validate the request data
+        $validator = Validator::make($request->all(), $rules, $customMessages);
+    
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('message', 'Input all required data')->with('success', false);
+        }
+    
+        $order->product_title = $request->product_title;
+        $order->quantity = $request->quantity;
+        $order->price = $request->price;
+        $order->delivery_status = $request->delivery_status;
+        $order->payment_status= $request->payment_status;
+
+        $order->save(); // Update the existing order
+    
+        return redirect('/orderlist')->with('message', 'Order Updated')->with('success', true);
+    }
+    
 }
 

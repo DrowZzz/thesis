@@ -20,14 +20,38 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
-        Validator::make($input, [
-            'name' => ['required', 'string', 'max:255'],
+        $rules = $this->passwordRules();
+        $validator = Validator::make($input, [
+            'name' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s]+$/'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'region' => ['required', 'string'],
+            'birthday' => 'required|date|before_or_equal:' . now()->subYears(16)->format('Y-m-d'),
             'contact' => ['required', 'numeric', 'digits:10'],
-            'password' => $this->passwordRules(),
+            'password' => $rules,
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
-        ])->validate();
+        ],[
+            'birthday.before_or_equal' => 'You must be at least 16 years old.',
+        ]);
+
+        $validator->after(function ($validator) use ($input) {
+            if (isset($input['password'])) {
+                $password = $input['password'];
+                if (!preg_match('/[A-Z]/', $password)) {
+                    $validator->errors()->add('password', 'The password must contain at least one uppercase letter.');
+                }
+                if (!preg_match('/[a-z]/', $password)) {
+                    $validator->errors()->add('password', 'The password must contain at least one lowercase letter.');
+                }
+                if (!preg_match('/[0-9]/', $password)) {
+                    $validator->errors()->add('password', 'The password must contain at least one number.');
+                }
+                if (!preg_match('/[\W]/', $password)) {
+                    $validator->errors()->add('password', 'The password must contain at least one special character.');
+                }
+            }
+        });
+        
+        $validator->validate();
         
         $phoneUtil = \libphonenumber\PhoneNumberUtil::getInstance();
 

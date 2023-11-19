@@ -12,7 +12,9 @@ use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Pagination\LengthAwarePaginator;
-
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use PDF;
 
 class HomeController extends Controller
 {
@@ -93,6 +95,7 @@ class HomeController extends Controller
     $donation->date = $request->date;
     $donation->pickup_location = $request->pickup_location;
     $donation->courier = $request->courier;
+    $donation->reason = "";
     $donation->uuid = $randomID; // Assign the generated 10-digit ID
     $donation->status = "pending";
     $donation->save();
@@ -112,13 +115,16 @@ private function generateRandomID($length)
     return $randomID;
 }
 
-    public function donationhistory()
-    {
-        $id=Auth::user()->id;
-        $donation=donations::where('user_id','=',$id)->get();
+public function donationhistory()
+{
+    $id = Auth::user()->id;
+    $donation = donations::where('user_id', '=', $id)
+                        ->orderBy('created_at', 'desc') // Order by date in descending order
+                        ->get();
 
-        return view('user.donationhistory',compact('donation'));
-    }
+    return view('user.donationhistory', compact('donation'));
+}
+
 
     
 
@@ -216,18 +222,74 @@ private function generateRandomID($length)
         $usertype = Auth::user()->usertype;
 
         if($usertype == '1'){
-            return view('admin.home');
+            $targetMonth = '2023-11';
+
+            $data = DB::table('orders')
+                ->select(DB::raw('DATE(created_at) as order_date'), DB::raw('SUM(price) as total_sales'))
+                ->whereRaw("DATE_FORMAT(created_at, '%Y-%m') = ?", [$targetMonth])
+                ->groupBy('order_date')
+                ->get();
+    
+            $days = [];
+            $dayTotalSales = [];
+    
+            foreach ($data as $record) {
+                $days[] = $record->order_date;
+                $dayTotalSales[] = $record->total_sales;
+            }
+
+            $data2 = DB::table('donations')
+                ->select(DB::raw('DATE(created_at) as donation_date'), DB::raw('SUM(quantity) as total_donations'))
+                ->whereRaw("DATE_FORMAT(created_at, '%Y-%m') = ?", [$targetMonth])
+                ->groupBy('donation_date')
+                ->get();
+    
+            $daysDonation= [];
+            $dayTotalDonation = [];
+    
+            foreach ($data2 as $records) {
+                $daysDonation[] = $records->donation_date;
+                $dayTotalDonation[] = $records->total_donations;
+            }
+
+            // If you're retrieving orders from the database using Eloquent
+            $orders = Order::all();
+            $totalSales = $orders->sum('price');
+
+            $donations = Donations::all();
+            $totalDonations = $donations->sum('quantity');
+            $userCount = User::count();
+
+            return view('admin.home', ['data' => $data, 'days' => $days, 'dayTotalSales' => $dayTotalSales, 'daysDonation' => $daysDonation, 'dayTotalDonation'=>$dayTotalDonation,'totalSales'=>$totalSales, 'totalDonations'=>$totalDonations, 'userCount'=> $userCount]);
         }
         else
         {
-            return view('user.userpage');
+            $id = Auth::user()->id;
+            $donations = donations::where('user_id', $id)
+            ->orderBy('created_at', 'desc') // Order by date in descending order
+            ->paginate(3);
+            $orders = order::where('user_id', $id)->paginate(3);
+            
+            $totalOrders = $orders->total();
+            $totalDonations = $donations->total(); // Use total() to get the total count, which considers pagination.
+            $totalQuantity = 0;
+        
+            foreach ($donations as $donation) {
+                $totalQuantity += $donation->quantity;
+            }
+        
+            return view('user.userpage', compact('donations', 'totalDonations', 'totalQuantity','orders','totalOrders'));
         }
     }
 
     public function index()
     {
         $id = Auth::user()->id;
-        $donations = donations::where('user_id', $id)->paginate(3);
+        $donations = donations::where('user_id', $id)
+            ->orderBy('created_at', 'desc') // Order by date in descending order
+            ->paginate(3);
+            $orders = order::where('user_id', $id)->paginate(3);
+            
         $orders = order::where('user_id', $id)->paginate(3);
         
         $totalOrders = $orders->total();
@@ -272,6 +334,12 @@ private function generateRandomID($length)
         return redirect()->back()->with('message', 'Payment Options Added')->with('success', true);
     }
 
+    public function print_pdf($id){
+        $donation = Donations::find($id);
+
+        $pdf=PDF::loadview('admin.pdf',compact('donation'));
+        return $pdf->download('donation_details.pdf');
+    }
     
 }
 
